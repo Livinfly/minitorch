@@ -32,14 +32,20 @@ class Module:
     def train(self) -> None:
         "Set the mode of this module and all descendent modules to `train`."
         # TODO: Implement for Task 0.4.
-        raise NotImplementedError("Need to implement for Task 0.4")
+        self.training = True
+        for module in self.__dict__["_modules"].values():
+            module.train()
+        # raise NotImplementedError("Need to implement for Task 0.4")
 
     def eval(self) -> None:
         "Set the mode of this module and all descendent modules to `eval`."
         # TODO: Implement for Task 0.4.
-        raise NotImplementedError("Need to implement for Task 0.4")
+        self.training = False
+        for module in self.__dict__["_modules"].values():
+            module.eval()
+        # raise NotImplementedError("Need to implement for Task 0.4")
 
-    def named_parameters(self) -> Sequence[Tuple[str, Parameter]]:
+    def named_parameters(self, prefix="") -> Sequence[Tuple[str, Parameter]]:
         """
         Collect all the parameters of this module and its descendents.
 
@@ -48,11 +54,23 @@ class Module:
             The name and `Parameter` of each ancestor parameter.
         """
         # TODO: Implement for Task 0.4.
+        # add necessary parameters, need complete with 'prefix.param_name' format!!!
+        ret = [
+            (prefix + param_name, param)
+            for param_name, param in self.__dict__["_parameters"].items()
+        ]
+        for module_name, module in self.__dict__["_modules"].items():
+            ret.extend(module.named_parameters(f"{prefix}{module_name}."))
+        return ret
         raise NotImplementedError("Need to implement for Task 0.4")
 
     def parameters(self) -> Sequence[Parameter]:
         "Enumerate over all the parameters of this module and its descendents."
         # TODO: Implement for Task 0.4.
+        ret = list(self.__dict__["_parameters"].values())
+        for module in self.__dict__["_modules"].values():
+            ret.extend(module.parameters())
+        return ret
         raise NotImplementedError("Need to implement for Task 0.4")
 
     def add_parameter(self, k: str, v: Any) -> Parameter:
@@ -72,7 +90,7 @@ class Module:
 
     def __setattr__(self, key: str, val: Parameter) -> None:
         if isinstance(val, Parameter):
-            self.__dict__["_parameters"][key] = val
+            self.__dict__["_parameters"][key] = val  # [Parameter].name might be None!!!
         elif isinstance(val, Module):
             self.__dict__["_modules"][key] = val
         else:
@@ -125,7 +143,9 @@ class Parameter:
     any value for testing.
     """
 
-    def __init__(self, x: Any, name: Optional[str] = None) -> None:
+    def __init__(
+        self, x: Any, name: Optional[str] = None
+    ) -> None:  # name isn't used that much?!
         self.value = x
         self.name = name
         if hasattr(x, "requires_grad_"):
