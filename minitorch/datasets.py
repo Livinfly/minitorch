@@ -21,6 +21,21 @@ class Graph:
 
 
 def simple(N: int) -> Graph:
+    """
+    Generate a simple binary classification dataset within the unit square
+    [0.0, 1.0) x [0.0, 1.0).
+
+    Args:
+        N (int): Number of data points to generate
+
+    Returns:
+        Graph: A graph object containing:
+            - N (int): Number of data points
+            - X (list): List of data point tuples
+            - y (list): List of labels (0/1) where:
+                * y = 1 if x1 < 0.5
+                * y = 0 otherwise
+    """
     X = make_pts(N)
     y = []
     for x_1, x_2 in X:
@@ -30,6 +45,21 @@ def simple(N: int) -> Graph:
 
 
 def diag(N: int) -> Graph:
+    """
+    Generate a diag binary classification dataset within the unit square
+    [0.0, 1.0) x [0.0, 1.0).
+
+    Args:
+        N (int): Number of data points
+
+    Returns:
+        Graph: A graph object containing:
+            - N (int): Number of data points
+            - X (list): List of data point tuples
+            - y (list): List of labels (0/1) where:
+                * y = 1 if x_1 + x_2 < 0.5
+                * y = 0 otherwise
+    """
     X = make_pts(N)
     y = []
     for x_1, x_2 in X:
@@ -39,6 +69,21 @@ def diag(N: int) -> Graph:
 
 
 def split(N: int) -> Graph:
+    """
+    Generate a split binary classification dataset within the unit square
+    [0.0, 1.0) x [0.0, 1.0).
+
+    Args:
+        N (int): Number of data points
+
+    Returns:
+        Graph: a graph object containing:
+            - N (int): Number of data points
+            - X (list): List of data point tuples
+            - y (list): List of labels where:
+                * y = 1 if x_1 < 0.2 or x_1 > 0.8
+                * y = 0 otherwise
+    """
     X = make_pts(N)
     y = []
     for x_1, x_2 in X:
@@ -48,6 +93,21 @@ def split(N: int) -> Graph:
 
 
 def xor(N: int) -> Graph:
+    """
+    Generate a xor binary classification dataset within the unit square
+    [0.0, 1.0) x [0.0, 1.0).
+
+    Args:
+        N (int): Number of data points
+
+    Returns:
+        Graph: a graph object containing:
+            - N (int): Number of data points
+            - X (list): List of data point tuples
+            - y (list): List of labels where:
+                * y = 1 if (x_1 < 0.5 and x_2 > 0.5) or (x_1 > 0.5 and x_2 < 0.5)
+                * y = 0 otherwise
+    """
     X = make_pts(N)
     y = []
     for x_1, x_2 in X:
@@ -57,6 +117,21 @@ def xor(N: int) -> Graph:
 
 
 def circle(N: int) -> Graph:
+    """
+    Generate a circle binary classification dataset within the unit square
+    [0.0, 1.0) x [0.0, 1.0).
+
+    Args:
+        N (int): Number of data points
+
+    Returns:
+        Graph: a graph object containing:
+            - N (int): Number of data points
+            - X (list): List of data point tuples
+            - y (list): List of labels where:
+                * y = 1 if x1 * x1 + x2 * x2 > 0.1
+                * y = 0 otherwise
+    """
     X = make_pts(N)
     y = []
     for x_1, x_2 in X:
@@ -67,6 +142,20 @@ def circle(N: int) -> Graph:
 
 
 def spiral(N: int) -> Graph:
+    """
+    Generate a spiral binary classification dataset within the unit square
+    [0.0, 1.0) x [0.0, 1.0).
+
+    Args:
+        N (int): Number of data points
+
+    Returns:
+        Graph: a graph object containing:
+            - N (int): Number of data points
+            - X (list): List of data point tuples
+            - y (list): List of labels
+    """
+
     def x(t: float) -> float:
         return t * math.cos(t) / 20.0
 
