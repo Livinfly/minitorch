@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Iterable, List, Tuple
+from typing import Any, Iterable, Tuple
 
 from typing_extensions import Protocol
 
@@ -23,6 +23,20 @@ def central_difference(f: Any, *vals: Any, arg: int = 0, epsilon: float = 1e-6) 
         An approximation of $f'_i(x_0, \ldots, x_{n-1})$
     """
     # TODO: Implement for Task 1.1.
+    """
+    central difference is more accurate, as Taylor's theorem goes, is O(h^2),
+    while forward and backward difference are O(h)
+    """
+    vals_ls = list(vals)
+    vals_plus = vals_ls.copy()
+    vals_plus[arg] += epsilon / 2
+
+    vals_minus = vals_ls.copy()
+    vals_minus[arg] -= epsilon / 2
+
+    f_plus, f_minus = f(*vals_plus), f(*vals_minus)
+
+    return (f_plus - f_minus) / epsilon
     raise NotImplementedError("Need to implement for Task 1.1")
 
 
