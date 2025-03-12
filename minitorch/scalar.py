@@ -184,6 +184,8 @@ class Scalar:
         assert h.ctx is not None
 
         # TODO: Implement for Task 1.3.
+        # last_fn is the whole function, then backward gives all derivatives.
+        return zip(h.inputs, h.last_fn.backward(h.ctx, d_output))
         raise NotImplementedError("Need to implement for Task 1.3")
 
     def backward(self, d_output: Optional[float] = None) -> None:
