@@ -167,6 +167,7 @@ class Scalar:
 
     def is_leaf(self) -> bool:
         "True if this variable created by the user (no `last_fn`)"
+        # weights, 'w' * x + 'b', not the temportary variables
         return self.history is not None and self.history.last_fn is None
 
     def is_constant(self) -> bool:
@@ -184,8 +185,11 @@ class Scalar:
         assert h.ctx is not None
 
         # TODO: Implement for Task 1.3.
-        # last_fn is the whole function, then backward gives all derivatives.
-        return zip(h.inputs, h.last_fn.backward(h.ctx, d_output))
+        derivs = h.last_fn.backward(h.ctx, d_output)
+        if type(derivs) is tuple:
+            return zip(h.inputs, derivs)
+        else:
+            return [(h.inputs[0], derivs)]
         raise NotImplementedError("Need to implement for Task 1.3")
 
     def backward(self, d_output: Optional[float] = None) -> None:

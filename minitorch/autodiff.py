@@ -76,6 +76,26 @@ def topological_sort(variable: Variable) -> Iterable[Variable]:
         Non-constant Variables in topological order starting from the right.
     """
     # TODO: Implement for Task 1.4.
+    # assume the graph is a DAG, no assert now!!!
+    def dfs(u: Variable):
+        # print(u, u.is_constant(), u.is_leaf())
+        if u.is_constant():
+            return []
+        ret = [u]
+        """
+        With example of `y = w2*(w1*x + b1)`
+        parents of `y` are `[w2*(w1*x + b1), b2]`
+        parents of `w2*(w1*x + b1)` are `[w2, (w1*x + b1)]`
+        so it return at `w2` but continue at (w1*x + b1) as the same
+        that's why, it's called `leaf`.
+        """
+        if u.is_leaf():
+            return ret
+        for v in u.parents:
+            ret.extend(dfs(v))
+        return ret
+
+    return dfs(variable)
     raise NotImplementedError("Need to implement for Task 1.4")
 
 
@@ -91,6 +111,23 @@ def backpropagate(variable: Variable, deriv: Any) -> None:
     No return. Should write to its results to the derivative values of each leaf through `accumulate_derivative`.
     """
     # TODO: Implement for Task 1.4.
+    topo_ls = topological_sort(variable)
+    # print("topo_ls")
+    # print(variable, len(topo_ls))
+    deriv_dict = {variable.unique_id: float(deriv)}
+    for u in topo_ls:
+        if u.unique_id is not variable.unique_id and u.is_leaf():
+            continue
+        d = deriv_dict[u.unique_id]
+        for input, dd in u.chain_rule(d):
+            if input.is_leaf():
+                input.accumulate_derivative(dd)
+            if input.unique_id not in deriv_dict:
+                deriv_dict[input.unique_id] = 0.0
+            deriv_dict[input.unique_id] = dd
+            # print(deriv_dict[input.unique_id])
+        # print(u, d, u.derivative)
+    return
     raise NotImplementedError("Need to implement for Task 1.4")
 
 

@@ -116,7 +116,8 @@ def test_sigmoid(a: float) -> None:
     assert_close(1 - s, sigmoid(-a))
     assert_close(sigmoid(0), 0.5)
     assert s * (1.0 - s) >= 0.0  # floating point precision problem !!!
-    # raise NotImplementedError('Need to implement for Task 0.2')
+    return
+    raise NotImplementedError("Need to implement for Task 0.2")
 
 
 @pytest.mark.task0_2
@@ -138,7 +139,8 @@ def test_transitive(a: float, b: float, c: float) -> None:
         assert c < b
     if c < b and b < a:
         assert c < a
-    # raise NotImplementedError('Need to implement for Task 0.2')
+    return
+    raise NotImplementedError("Need to implement for Task 0.2")
 
 
 @pytest.mark.task0_2
@@ -150,7 +152,8 @@ def test_symmetric(a: float, b: float) -> None:
     """
     # TODO: Implement for Task 0.2.
     assert mul(a, b) == mul(b, a)
-    # raise NotImplementedError('Need to implement for Task 0.2')
+    return
+    raise NotImplementedError("Need to implement for Task 0.2")
 
 
 @pytest.mark.task0_2
@@ -162,7 +165,8 @@ def test_distribute(a: float, b: float, c: float) -> None:
     """
     # TODO: Implement for Task 0.2.
     assert_close(mul(c, add(a, b)), add(mul(a, c), mul(b, c)))
-    # raise NotImplementedError('Need to implement for Task 0.2')
+    return
+    raise NotImplementedError("Need to implement for Task 0.2")
 
 
 @pytest.mark.task0_2
@@ -173,7 +177,8 @@ def test_other(a: float, b: float, c: float) -> None:
     """
     # TODO: Implement for Task 0.2.
     assert_close(mul(mul(a, b), c), mul(a, mul(b, c)))
-    # raise NotImplementedError('Need to implement for Task 0.2')
+    return
+    raise NotImplementedError("Need to implement for Task 0.2")
 
 
 # ## Task 0.3  - Higher-order functions
@@ -203,7 +208,8 @@ def test_sum_distribute(ls1: List[float], ls2: List[float]) -> None:
     """
     # TODO: Implement for Task 0.3.
     assert_close(sum(ls1) + sum(ls2), sum(addLists(ls1, ls2)))
-    # raise NotImplementedError("Need to implement for Task 0.3")
+    return
+    raise NotImplementedError("Need to implement for Task 0.3")
 
 
 @pytest.mark.task0_3
