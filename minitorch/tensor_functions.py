@@ -126,8 +126,8 @@ class Sigmoid(Function):
         # TODO: Implement for Task 2.4.
         (t1,) = ctx.saved_values
         s = t1.f.sigmoid_map(t1)
-        tensor1 = minitorch.Tensor.make([1.0], (1,), backend=grad_output.backend)
-        # tensor1 = tensor(1.0)
+        # tensor1 = minitorch.Tensor.make([1.0], (1,), backend=grad_output.backend)
+        tensor1 = tensor([1.0])
         ft1 = s.f.mul_zip(s, tensor1 - s)
         return grad_output * ft1
         raise NotImplementedError("Need to implement for Task 2.4")
@@ -212,7 +212,7 @@ class LT(Function):
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
         # TODO: Implement for Task 2.4.
-        # return tensor(0.0), tensor(0.0)
+        return tensor([0.0]), tensor([0.0])
         return minitorch.Tensor.make(
             [0.0], (1,), backend=grad_output.backend
         ), minitorch.Tensor.make([0.0], (1,), backend=grad_output.backend)
@@ -229,7 +229,7 @@ class EQ(Function):
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Tensor]:
         # TODO: Implement for Task 2.4.
-        # return tensor(0.0), tensor(0.0)
+        return tensor([0.0]), tensor([0.0])
         return minitorch.Tensor.make(
             [0.0], (1,), backend=grad_output.backend
         ), minitorch.Tensor.make([0.0], (1,), backend=grad_output.backend)
@@ -392,7 +392,7 @@ def tensor(
     Produce a tensor with data and shape from ls
 
     Args:
-        ls: data for tensor
+        ls: data for tensor  # best to be a list
         backend : tensor backend
         requires_grad : turn on autodifferentiation
 
@@ -414,6 +414,7 @@ def tensor(
 
     cur = flatten(ls)
     shape2 = shape(ls)
+    # print(shape2)
     return _tensor(cur, tuple(shape2), backend=backend, requires_grad=requires_grad)
 
 
