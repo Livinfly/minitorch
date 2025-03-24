@@ -110,6 +110,9 @@ def exp(x: float) -> float:
 def log_back(x: float, d: float) -> float:
     r"If $f = log$ as above, compute $d \times f'(x)$"
     # TODO: Implement for Task 0.1.
+    eps = 1e-8  # division by zero
+    if x <= eps:
+        return 0.0
     return d * (1.0 / x)
     raise NotImplementedError("Need to implement for Task 0.1")
 
@@ -117,13 +120,18 @@ def log_back(x: float, d: float) -> float:
 def inv(x: float) -> float:
     "$f(x) = 1/x$"
     # TODO: Implement for Task 0.1.
-    return 1.0 / x
+    eps = 1e-8  # division by zero
+    safe_x = x if abs(x) > eps else eps
+    return 1.0 / safe_x
     raise NotImplementedError("Need to implement for Task 0.1")
 
 
 def inv_back(x: float, d: float) -> float:
     r"If $f(x) = 1/x$ compute $d \times f'(x)$"
     # TODO: Implement for Task 0.1.
+    eps = 1e-8  # division by zero
+    if abs(x) < eps:
+        return 0.0
     return -d * (1.0 / x**2)
     raise NotImplementedError("Need to implement for Task 0.1")
 

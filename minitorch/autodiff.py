@@ -114,7 +114,7 @@ def backpropagate(variable: Variable, deriv: Any) -> None:
     topo_ls = topological_sort(variable)
     # print("topo_ls")
     # print(variable, len(topo_ls))
-    deriv_dict = {variable.unique_id: float(deriv)}
+    deriv_dict = {variable.unique_id: deriv}
     for u in topo_ls:
         if u.unique_id is not variable.unique_id and u.is_leaf():
             continue

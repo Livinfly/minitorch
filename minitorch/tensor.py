@@ -42,7 +42,7 @@ if TYPE_CHECKING:
     from .tensor_functions import Function
     from .tensor_ops import TensorBackend
 
-    TensorLike = Union[float, int, "Tensor"]
+    TensorLike = Union[float, int, np.generic, "Tensor"]
 
 
 @dataclass
@@ -138,6 +138,8 @@ class Tensor:
         "Turns a python number into a tensor with the same backend."
         if isinstance(b, (int, float)):
             c = Tensor.make([b], (1,), backend=self.backend)
+        elif isinstance(b, np.generic):  # [ ... ]
+            c = Tensor.make([b.item()], (1,), backend=self.backend)
         else:
             b._type_(self.backend)
             c = b

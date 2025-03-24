@@ -12,6 +12,7 @@ from .tensor_data import (
     index_to_position,
     shape_broadcast,
     to_index,
+    strides_from_shape,
 )
 
 if TYPE_CHECKING:
@@ -265,6 +266,15 @@ def tensor_map(
         in_strides: Strides,
     ) -> None:
         # TODO: Implement for Task 2.3.
+        out_shape = shape_broadcast(in_shape, out_shape)
+        out_strides = strides_from_shape(out_shape)  # noqa: F841
+        for out_ordinal in range(len(out)):
+            out_index, in_index = np.zeros_like(out_shape), np.zeros_like(in_shape)
+            to_index(out_ordinal, out_shape, out_index)
+            broadcast_index(out_index, out_shape, in_shape, in_index)
+            in_ordinal = index_to_position(in_index, in_strides)
+            out[out_ordinal] = fn(in_storage[in_ordinal])
+        return
         raise NotImplementedError("Need to implement for Task 2.3")
 
     return _map
@@ -310,6 +320,23 @@ def tensor_zip(
         b_strides: Strides,
     ) -> None:
         # TODO: Implement for Task 2.3.
+        out_shape = shape_broadcast(a_shape, b_shape)
+        out_strides = strides_from_shape(out_shape)  # noqa: F841
+        for out_ordinal in range(len(out)):
+            # index initialization is essential, `shape` of broadcast_index is based on that
+            out_index, a_index, b_index = (
+                np.zeros_like(out_shape),
+                np.zeros_like(a_shape),
+                np.zeros_like(b_shape),
+            )
+            to_index(out_ordinal, out_shape, out_index)
+            broadcast_index(out_index, out_shape, a_shape, a_index)
+            broadcast_index(out_index, out_shape, b_shape, b_index)
+            a_ordinal, b_ordinal = index_to_position(
+                a_index, a_strides
+            ), index_to_position(b_index, b_strides)
+            out[out_ordinal] = fn(a_storage[a_ordinal], b_storage[b_ordinal])
+        return
         raise NotImplementedError("Need to implement for Task 2.3")
 
     return _zip
@@ -341,6 +368,16 @@ def tensor_reduce(
         reduce_dim: int,
     ) -> None:
         # TODO: Implement for Task 2.3.
+        out_shape = list(a_shape)
+        out_shape[reduce_dim] = 1
+        out_strides = strides_from_shape(out_shape)
+        for a_ordinal in range(len(a_storage)):
+            a_index, out_index = np.zeros_like(a_shape), np.zeros_like(out_shape)
+            to_index(a_ordinal, a_shape, a_index)
+            broadcast_index(a_index, a_shape, out_shape, out_index)
+            out_ordinal = index_to_position(out_index, out_strides)
+            out[out_ordinal] = fn(out[out_ordinal], a_storage[a_ordinal])
+        return
         raise NotImplementedError("Need to implement for Task 2.3")
 
     return _reduce
