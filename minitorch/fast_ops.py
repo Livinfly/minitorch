@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 from numba import njit, prange
 
-from .tensor_data import (
+from .tensor_data import (  # noqa: F401
     MAX_DIMS,
     broadcast_index,
     index_to_position,
@@ -18,9 +18,13 @@ if TYPE_CHECKING:
     from typing import Callable, Optional
 
     from .tensor import Tensor
-    from .tensor_data import Index, Shape, Storage, Strides
+    from .tensor_data import Index, Shape, Storage, Strides  # noqa: F401
 
 # TIP: Use `NUMBA_DISABLE_JIT=1 pytest tests/ -m task3_1` to run these tests without JIT.
+# Similarly use `NUMBA_DISABLE_JIT=0 pytest tests/ -m task3_1` to run with JIT.
+
+# note that, `python .\project\parallel_check.py` need `NUMBA_DISABLE_JIT=0`!
+
 # `$env:NUMBA_DISABLE_JIT=1; pytest tests/ -m task3_1` in PowerShell
 # `set NUMBA_DISABLE_JIT=1 && pytest tests/ -m task3_1` in CMD
 # set in the code, using `numba.config.DISABLE_JIT = True`
@@ -360,6 +364,25 @@ def _tensor_matrix_multiply(
     b_batch_stride = b_strides[0] if b_shape[0] > 1 else 0
 
     # TODO: Implement for Task 3.2.
+    batch_size = out_shape[0]
+    M = out_shape[1]
+    N = out_shape[2]
+    K = a_shape[-1]
+    for i in prange(batch_size):
+        a_batch_offset = i * a_batch_stride
+        b_batch_offset = i * b_batch_stride
+        for j in range(M):
+            a_row_offset = a_batch_offset + j * a_strides[-2]
+            for k in range(N):
+                b_col_offset = b_batch_offset + k * b_strides[-1]
+                tot = 0.0
+                for u in range(K):
+                    a_ordinal = a_row_offset + u * a_strides[-1]
+                    b_ordinal = b_col_offset + u * b_strides[-2]
+                    tot += a_storage[a_ordinal] * b_storage[b_ordinal]
+                out_ordinal = index_to_position([i, j, k], out_strides)
+                out[int(out_ordinal)] = tot
+    return
     raise NotImplementedError("Need to implement for Task 3.2")
 
 

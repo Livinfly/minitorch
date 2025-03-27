@@ -62,7 +62,10 @@ def max(x: float, y: float) -> float:
 def is_close(x: float, y: float) -> float:
     "$f(x) = |x - y| < 1e-2$"
     # TODO: Implement for Task 0.1.
-    return float(abs(x - y) < 1e-2)
+
+    # Numba need explicit float transformation
+    return 1.0 if abs(x - y) < 1e-2 else 0.0
+    # return float(abs(x - y) < 1e-2)
     raise NotImplementedError("Need to implement for Task 0.1")
 
 
