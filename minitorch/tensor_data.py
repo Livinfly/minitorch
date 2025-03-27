@@ -44,7 +44,14 @@ def index_to_position(index: Index, strides: Strides) -> int:
     """
 
     # TODO: Implement for Task 2.1.
-    return index.dot(strides)
+    # Numba requires:
+    # With argument(s): '(array(int32, 1d, C), array(int64, 1d, C))':
+    # TypingError: np.dot() arguments must all have the same dtype
+    # return index.dot(strides)
+    pos = 0
+    for i in range(len(index)):
+        pos += index[i] * strides[i]
+    return pos
     raise NotImplementedError("Need to implement for Task 2.1")
 
 
@@ -62,7 +69,8 @@ def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
 
     """
     # TODO: Implement for Task 2.1.
-    for i in reversed(range(len(shape))):
+    # Untyped global name 'reversed': Cannot determine Numba type of <class 'type'>
+    for i in range(len(shape) - 1, -1, -1):
         out_index[i] = ordinal % shape[i]
         ordinal = ordinal // shape[i]
     return
@@ -162,6 +170,8 @@ class TensorData:
             raise IndexingError(f"Len of strides {strides} must match {shape}.")
         self._strides = array(strides)
         self._shape = array(shape)
+        # self._shape = np.array(shape, dtype=np.int32)
+        # self._strides = np.array(strides, dtype=np.int32)
         self.strides = strides
         self.dims = len(strides)
         self.size = int(prod(shape))
@@ -263,23 +273,23 @@ class TensorData:
     def to_string(self) -> str:
         s = ""
         for index in self.indices():
-            l = ""
+            lt = ""
             for i in range(len(index) - 1, -1, -1):
                 if index[i] == 0:
-                    l = "\n%s[" % ("\t" * i) + l
+                    lt = "\n%s[" % ("\t" * i) + lt
                 else:
                     break
-            s += l
+            s += lt
             v = self.get(index)
             s += f"{v:3.2f}"
-            l = ""
+            lt = ""
             for i in range(len(index) - 1, -1, -1):
                 if index[i] == self.shape[i] - 1:
-                    l += "]"
+                    lt += "]"
                 else:
                     break
-            if l:
-                s += l
+            if lt:
+                s += lt
             else:
                 s += " "
         return s

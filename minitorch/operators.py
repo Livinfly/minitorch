@@ -79,7 +79,8 @@ def sigmoid(x: float) -> float:
     for stability.
     """
     # TODO: Implement for Task 0.1.
-    return 1.0 / (1.0 + exp(-x)) if x > 0 else exp(x) / (1.0 + exp(x))
+    # numba error, (exp -> math.exp)
+    return 1.0 / (1.0 + math.exp(-x)) if x > 0 else math.exp(x) / (1.0 + math.exp(x))
     raise NotImplementedError("Need to implement for Task 0.1")
 
 

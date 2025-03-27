@@ -6,7 +6,7 @@ import numpy as np
 from typing_extensions import Protocol
 
 from . import operators
-from .tensor_data import (
+from .tensor_data import (  # noqa: F401
     MAX_DIMS,
     broadcast_index,
     index_to_position,
@@ -17,7 +17,7 @@ from .tensor_data import (
 
 if TYPE_CHECKING:
     from .tensor import Tensor
-    from .tensor_data import Index, Shape, Storage, Strides
+    from .tensor_data import Index, Shape, Storage, Strides  # noqa: F401
 
 
 class MapProto(Protocol):
@@ -266,10 +266,8 @@ def tensor_map(
         in_strides: Strides,
     ) -> None:
         # TODO: Implement for Task 2.3.
-        out_shape = shape_broadcast(in_shape, out_shape)
-        out_strides = strides_from_shape(out_shape)  # noqa: F841
+        out_index, in_index = np.zeros_like(out_shape), np.zeros_like(in_shape)
         for out_ordinal in range(len(out)):
-            out_index, in_index = np.zeros_like(out_shape), np.zeros_like(in_shape)
             to_index(out_ordinal, out_shape, out_index)
             broadcast_index(out_index, out_shape, in_shape, in_index)
             in_ordinal = index_to_position(in_index, in_strides)
@@ -320,15 +318,13 @@ def tensor_zip(
         b_strides: Strides,
     ) -> None:
         # TODO: Implement for Task 2.3.
-        out_shape = shape_broadcast(a_shape, b_shape)
-        out_strides = strides_from_shape(out_shape)  # noqa: F841
+        out_index, a_index, b_index = (
+            np.zeros_like(out_shape),
+            np.zeros_like(a_shape),
+            np.zeros_like(b_shape),
+        )
         for out_ordinal in range(len(out)):
             # index initialization is essential, `shape` of broadcast_index is based on that
-            out_index, a_index, b_index = (
-                np.zeros_like(out_shape),
-                np.zeros_like(a_shape),
-                np.zeros_like(b_shape),
-            )
             to_index(out_ordinal, out_shape, out_index)
             broadcast_index(out_index, out_shape, a_shape, a_index)
             broadcast_index(out_index, out_shape, b_shape, b_index)
@@ -368,11 +364,9 @@ def tensor_reduce(
         reduce_dim: int,
     ) -> None:
         # TODO: Implement for Task 2.3.
-        out_shape = list(a_shape)
-        out_shape[reduce_dim] = 1
-        out_strides = strides_from_shape(out_shape)
+        # the implementation is not that good, waiting for the better one!!!!!
+        a_index, out_index = np.zeros_like(a_shape), np.zeros_like(out_shape)
         for a_ordinal in range(len(a_storage)):
-            a_index, out_index = np.zeros_like(a_shape), np.zeros_like(out_shape)
             to_index(a_ordinal, a_shape, a_index)
             broadcast_index(a_index, a_shape, out_shape, out_index)
             out_ordinal = index_to_position(out_index, out_strides)

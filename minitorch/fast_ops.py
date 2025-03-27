@@ -21,12 +21,17 @@ if TYPE_CHECKING:
     from .tensor_data import Index, Shape, Storage, Strides
 
 # TIP: Use `NUMBA_DISABLE_JIT=1 pytest tests/ -m task3_1` to run these tests without JIT.
+# `$env:NUMBA_DISABLE_JIT=1; pytest tests/ -m task3_1` in PowerShell
+# `set NUMBA_DISABLE_JIT=1 && pytest tests/ -m task3_1` in CMD
+# set in the code, using `numba.config.DISABLE_JIT = True`
 
 # This code will JIT compile fast versions your tensor_data functions.
 # If you get an error, read the docs for NUMBA as to what is allowed
 # in these functions.
-to_index = njit(inline="always")(to_index)
-index_to_position = njit(inline="always")(index_to_position)
+to_index = njit(inline="never", parallel=False)(to_index)  # 'always', can be better???
+index_to_position = njit(inline="never", parallel=False)(
+    index_to_position
+)  # 'always', can use block-reduce for parallel, but...
 broadcast_index = njit(inline="always")(broadcast_index)
 
 
@@ -160,6 +165,24 @@ def tensor_map(
         in_strides: Strides,
     ) -> None:
         # TODO: Implement for Task 3.1.
+        # array -> .all()
+        if (
+            len(out_shape) == len(in_shape)
+            and (out_strides == in_strides).all()
+            and (out_shape == in_shape).all()
+        ):
+            for i in prange(len(out)):
+                out[i] = fn(in_storage[i])
+        else:
+            for out_ordinal in prange(len(out)):
+                out_index, in_index = np.empty(
+                    len(out_shape), dtype=np.int32
+                ), np.empty(len(in_shape), dtype=np.int32)
+                to_index(out_ordinal, out_shape, out_index)
+                broadcast_index(out_index, out_shape, in_shape, in_index)
+                in_ordinal = index_to_position(in_index, in_strides)
+                out[out_ordinal] = fn(in_storage[in_ordinal])
+        return
         raise NotImplementedError("Need to implement for Task 3.1")
 
     return njit(parallel=True)(_map)  # type: ignore
@@ -199,6 +222,37 @@ def tensor_zip(
         b_strides: Strides,
     ) -> None:
         # TODO: Implement for Task 3.1.
+        # [[1]] == [1]
+        f1, f2 = (
+            len(out_shape) == len(a_shape)
+            and (out_strides == a_strides).all()
+            and (out_shape == a_shape).all(),
+            len(out_shape) == len(b_shape)
+            and (out_strides == b_strides).all()
+            and (out_shape == b_shape).all(),
+        )
+        if f1 and f2:
+            for i in prange(len(out)):
+                out[i] = fn(a_storage[i], b_storage[i])
+        else:
+            for out_ordinal in prange(len(out)):
+                out_index = np.empty(len(out_shape), dtype=np.int32)
+                a_ordinal, b_ordinal = out_ordinal, out_ordinal
+                if not f1 or not f2:
+                    to_index(out_ordinal, out_shape, out_index)
+                if not f1:
+                    a_index = np.empty(len(a_shape), dtype=np.int32)
+                    broadcast_index(out_index, out_shape, a_shape, a_index)
+                    a_ordinal = index_to_position(a_index, a_strides)
+                if not f2:
+                    b_index = np.empty(len(b_shape), dtype=np.int32)
+                    broadcast_index(out_index, out_shape, b_shape, b_index)
+                    b_ordinal = index_to_position(b_index, b_strides)
+                # NumbaTypeError: Unsupported array index type float64 in [float64]
+                out[int(out_ordinal)] = fn(
+                    a_storage[int(a_ordinal)], b_storage[int(b_ordinal)]
+                )
+        return
         raise NotImplementedError("Need to implement for Task 3.1")
 
     return njit(parallel=True)(_zip)  # type: ignore
@@ -233,6 +287,29 @@ def tensor_reduce(
         reduce_dim: int,
     ) -> None:
         # TODO: Implement for Task 3.1.
+        # hypothesis.errors.FailedHealthCheck, I add `a_shape[reduce_dim] == 1` to solve
+        if a_shape[reduce_dim] == 1:
+            for i in prange(len(a_storage)):
+                out[i] = a_storage[i]
+        else:
+            # for a_ordinal in prange(len(a_storage)):
+            #     a_index = np.empty(len(a_shape), dtype=np.int32)
+            #     out_index = np.empty(len(a_shape), dtype=np.int32)
+            #     to_index(a_ordinal, a_shape, a_index)
+            #     broadcast_index(a_index, a_shape, out_shape, out_index)
+            #     out_ordinal = index_to_position(out_index, out_strides)
+            #     out[out_ordinal] = fn(out[out_ordinal], a_storage[a_ordinal])
+            for out_ordinal in prange(len(out)):
+                out_index = np.empty(len(out_shape), dtype=np.int32)
+                to_index(out_ordinal, out_shape, out_index)
+                total = out[out_ordinal]
+                for k in range(a_shape[reduce_dim]):
+                    a_index = out_index
+                    a_index[reduce_dim] = k
+                    a_ordinal = index_to_position(a_index, a_strides)
+                    total = fn(total, a_storage[a_ordinal])
+                out[out_ordinal] = total
+        return
         raise NotImplementedError("Need to implement for Task 3.1")
 
     return njit(parallel=True)(_reduce)  # type: ignore
