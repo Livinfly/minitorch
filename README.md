@@ -11,11 +11,11 @@ MAP
  
 ================================================================================
  Parallel Accelerator Optimizing:  Function tensor_map.<locals>._map,
-e:\000download\github\minitorch\minitorch\fast_ops.py (159)
+e:\000download\github\minitorch\minitorch\fast_ops.py (163)
 ================================================================================
 
 
-Parallel loop listing for  Function tensor_map.<locals>._map, e:\000download\github\minitorch\minitorch\fast_ops.py (159)
+Parallel loop listing for  Function tensor_map.<locals>._map, e:\000download\github\minitorch\minitorch\fast_ops.py (163)
 -----------------------------------------------------------------------------|loop #ID
     def _map(                                                                |
         out: Storage,                                                        |
@@ -42,7 +42,7 @@ Parallel loop listing for  Function tensor_map.<locals>._map, e:\000download\git
                 to_index(out_ordinal, out_shape, out_index)                  |
                 broadcast_index(out_index, out_shape, in_shape, in_index)    |
                 in_ordinal = index_to_position(in_index, in_strides)         |
-                out[out_ordinal] = fn(in_storage[in_ordinal])                |
+                out[out_ordinal] = fn(in_storage[int(in_ordinal)])           |
         return                                                               |
         raise NotImplementedError("Need to implement for Task 3.1")          |
 --------------------------------- Fusing loops ---------------------------------
@@ -60,13 +60,13 @@ Parallel structure is already optimal.
 ---------------------------Loop invariant code motion---------------------------
 Allocation hoisting:
 The memory allocation derived from the instruction at
-e:\000download\github\minitorch\minitorch\fast_ops.py (178) is hoisted out of
+e:\000download\github\minitorch\minitorch\fast_ops.py (182) is hoisted out of
 the parallel loop labelled #3 (it will be performed before the loop is executed
 and reused inside the loop):
    Allocation:: out_index, in_index = np.empty(
     - numpy.empty() is used for the allocation.
 The memory allocation derived from the instruction at
-e:\000download\github\minitorch\minitorch\fast_ops.py (180) is hoisted out of
+e:\000download\github\minitorch\minitorch\fast_ops.py (184) is hoisted out of
 the parallel loop labelled #3 (it will be performed before the loop is executed
 and reused inside the loop):
    Allocation:: ), np.empty(len(in_shape), dtype=np.int32)
@@ -76,11 +76,11 @@ ZIP
  
 ================================================================================
  Parallel Accelerator Optimizing:  Function tensor_zip.<locals>._zip,
-e:\000download\github\minitorch\minitorch\fast_ops.py (213)
+e:\000download\github\minitorch\minitorch\fast_ops.py (217)
 ================================================================================
 
 
-Parallel loop listing for  Function tensor_zip.<locals>._zip, e:\000download\github\minitorch\minitorch\fast_ops.py (213)
+Parallel loop listing for  Function tensor_zip.<locals>._zip, e:\000download\github\minitorch\minitorch\fast_ops.py (217)
 ---------------------------------------------------------------------------------------|loop #ID
     def _zip(                                                                          |
         out: Storage,                                                                  |
@@ -109,19 +109,21 @@ Parallel loop listing for  Function tensor_zip.<locals>._zip, e:\000download\git
         else:                                                                          |
             for out_ordinal in prange(len(out)):---------------------------------------| #9
                 out_index = np.empty(len(out_shape), dtype=np.int32)                   |
-                a_ordinal, b_ordinal = out_ordinal, out_ordinal                        |
-                if not f1 or not f2:                                                   |
-                    to_index(out_ordinal, out_shape, out_index)                        |
-                if not f1:                                                             |
+                to_index(out_ordinal, out_shape, out_index)                            |
+                if f1:                                                                 |
+                    a_ordinal = out_ordinal                                            |
+                else:                                                                  |
                     a_index = np.empty(len(a_shape), dtype=np.int32)                   |
                     broadcast_index(out_index, out_shape, a_shape, a_index)            |
                     a_ordinal = index_to_position(a_index, a_strides)                  |
-                if not f2:                                                             |
+                if f2:                                                                 |
+                    b_ordinal = out_ordinal                                            |
+                else:                                                                  |
                     b_index = np.empty(len(b_shape), dtype=np.int32)                   |
                     broadcast_index(out_index, out_shape, b_shape, b_index)            |
                     b_ordinal = index_to_position(b_index, b_strides)                  |
                 # NumbaTypeError: Unsupported array index type float64 in [float64]    |
-                out[int(out_ordinal)] = fn(                                            |
+                out[out_ordinal] = fn(                                                 |
                     a_storage[int(a_ordinal)], b_storage[int(b_ordinal)]               |
                 )                                                                      |
         return                                                                         |
@@ -141,33 +143,33 @@ Parallel structure is already optimal.
 ---------------------------Loop invariant code motion---------------------------
 Allocation hoisting:
 The memory allocation derived from the instruction at
-e:\000download\github\minitorch\minitorch\fast_ops.py (248) is hoisted out of
+e:\000download\github\minitorch\minitorch\fast_ops.py (254) is hoisted out of
 the parallel loop labelled #9 (it will be performed before the loop is executed
 and reused inside the loop):
    Allocation:: b_index = np.empty(len(b_shape), dtype=np.int32)
     - numpy.empty() is used for the allocation.
 The memory allocation derived from the instruction at
-e:\000download\github\minitorch\minitorch\fast_ops.py (244) is hoisted out of
-the parallel loop labelled #9 (it will be performed before the loop is executed
-and reused inside the loop):
-   Allocation:: a_index = np.empty(len(a_shape), dtype=np.int32)
-    - numpy.empty() is used for the allocation.
-The memory allocation derived from the instruction at
-e:\000download\github\minitorch\minitorch\fast_ops.py (239) is hoisted out of
+e:\000download\github\minitorch\minitorch\fast_ops.py (243) is hoisted out of
 the parallel loop labelled #9 (it will be performed before the loop is executed
 and reused inside the loop):
    Allocation:: out_index = np.empty(len(out_shape), dtype=np.int32)
+    - numpy.empty() is used for the allocation.
+The memory allocation derived from the instruction at
+e:\000download\github\minitorch\minitorch\fast_ops.py (248) is hoisted out of
+the parallel loop labelled #9 (it will be performed before the loop is executed
+and reused inside the loop):
+   Allocation:: a_index = np.empty(len(a_shape), dtype=np.int32)
     - numpy.empty() is used for the allocation.
 None
 REDUCE
  
 ================================================================================
  Parallel Accelerator Optimizing:  Function tensor_reduce.<locals>._reduce,
-e:\000download\github\minitorch\minitorch\fast_ops.py (280)
+e:\000download\github\minitorch\minitorch\fast_ops.py (286)
 ================================================================================
 
 
-Parallel loop listing for  Function tensor_reduce.<locals>._reduce, e:\000download\github\minitorch\minitorch\fast_ops.py (280)
+Parallel loop listing for  Function tensor_reduce.<locals>._reduce, e:\000download\github\minitorch\minitorch\fast_ops.py (286)
 --------------------------------------------------------------------------------------------|loop #ID
     def _reduce(                                                                            |
         out: Storage,                                                                       |
@@ -199,7 +201,7 @@ Parallel loop listing for  Function tensor_reduce.<locals>._reduce, e:\000downlo
                     a_index = out_index                                                     |
                     a_index[reduce_dim] = k                                                 |
                     a_ordinal = index_to_position(a_index, a_strides)                       |
-                    total = fn(total, a_storage[a_ordinal])                                 |
+                    total = fn(total, a_storage[int(a_ordinal)])                            |
                 out[out_ordinal] = total                                                    |
         return                                                                              |
         raise NotImplementedError("Need to implement for Task 3.1")                         |
@@ -218,7 +220,7 @@ Parallel structure is already optimal.
 ---------------------------Loop invariant code motion---------------------------
 Allocation hoisting:
 The memory allocation derived from the instruction at
-e:\000download\github\minitorch\minitorch\fast_ops.py (303) is hoisted out of
+e:\000download\github\minitorch\minitorch\fast_ops.py (309) is hoisted out of
 the parallel loop labelled #11 (it will be performed before the loop is executed
  and reused inside the loop):
    Allocation:: out_index = np.empty(len(out_shape), dtype=np.int32)
@@ -228,11 +230,11 @@ MATRIX MULTIPLY
  
 ================================================================================
  Parallel Accelerator Optimizing:  Function _tensor_matrix_multiply,
-e:\000download\github\minitorch\minitorch\fast_ops.py (318)
+e:\000download\github\minitorch\minitorch\fast_ops.py (324)
 ================================================================================
 
 
-Parallel loop listing for  Function _tensor_matrix_multiply, e:\000download\github\minitorch\minitorch\fast_ops.py (318)
+Parallel loop listing for  Function _tensor_matrix_multiply, e:\000download\github\minitorch\minitorch\fast_ops.py (324)
 ---------------------------------------------------------------------------|loop #ID
 def _tensor_matrix_multiply(                                               |
     out: Storage,                                                          |

@@ -49,8 +49,8 @@ def index_to_position(index: Index, strides: Strides) -> int:
     # TypingError: np.dot() arguments must all have the same dtype
     # return index.dot(strides)
     pos = 0
-    for i in range(len(index)):
-        pos += index[i] * strides[i]
+    for idx, stride in zip(index, strides):
+        pos += idx * stride
     return pos
     raise NotImplementedError("Need to implement for Task 2.1")
 
@@ -70,9 +70,10 @@ def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
     """
     # TODO: Implement for Task 2.1.
     # Untyped global name 'reversed': Cannot determine Numba type of <class 'type'>
+    pos = ordinal + 0
     for i in range(len(shape) - 1, -1, -1):
-        out_index[i] = ordinal % shape[i]
-        ordinal = ordinal // shape[i]
+        out_index[i] = pos % shape[i]
+        pos = pos // shape[i]
     return
     raise NotImplementedError("Need to implement for Task 2.1")
 
