@@ -1,3 +1,4 @@
+# flake8: noqa
 from typing import Tuple
 
 import numpy as np
@@ -81,6 +82,28 @@ def _tensor_conv1d(
     s2 = weight_strides
 
     # TODO: Implement for Task 4.1.
+    for b in prange(batch):
+        for out_channel in prange(out_channels):
+            for i in range(out_width):
+                accum = 0.0
+                for in_channel in range(in_channels):
+                    for k in range(kw):
+                        if reverse:
+                            in_idx = i - k
+                        else:
+                            in_idx = i + k
+                        if 0 <= in_idx < width:
+                            in_ = input[s1[0] * b + s1[1] * in_channel + s1[2] * in_idx]
+                            w_ = weight[
+                                s2[0] * out_channel + s2[1] * in_channel + s2[2] * k
+                            ]
+                            accum += in_ * w_
+                out[
+                    out_strides[0] * b
+                    + out_strides[1] * out_channel
+                    + out_strides[2] * i
+                ] = accum
+    return
     raise NotImplementedError("Need to implement for Task 4.1")
 
 
@@ -190,7 +213,7 @@ def _tensor_conv2d(
         weight_strides (Strides): strides for `input` tensor.
         reverse (bool): anchor weight at top-left or bottom-right
     """
-    batch_, out_channels, _, _ = out_shape
+    batch_, out_channels, out_height, out_width = out_shape
     batch, in_channels, height, width = input_shape
     out_channels_, in_channels_, kh, kw = weight_shape
 
@@ -207,6 +230,41 @@ def _tensor_conv2d(
     s20, s21, s22, s23 = s2[0], s2[1], s2[2], s2[3]
 
     # TODO: Implement for Task 4.2.
+    for b in prange(batch):
+        for out_channel in prange(out_channels):
+            for h in range(out_height):
+                for w in range(out_width):
+                    accum = 0.0
+                    for in_channel in range(in_channels):
+                        for p in range(kh):
+                            for q in range(kw):
+                                if reverse:
+                                    h_in_idx = h - p
+                                    w_in_idx = w - q
+                                else:
+                                    h_in_idx = h + p
+                                    w_in_idx = w + q
+                                if 0 <= h_in_idx < height and 0 <= w_in_idx < width:
+                                    in_ = input[
+                                        s10 * b
+                                        + s11 * in_channel
+                                        + s12 * h_in_idx
+                                        + s13 * w_in_idx
+                                    ]
+                                    w_ = weight[
+                                        s20 * out_channel
+                                        + s21 * in_channel
+                                        + s22 * p
+                                        + s23 * q
+                                    ]
+                                    accum += in_ * w_
+                        out[
+                            out_strides[0] * b
+                            + out_strides[1] * out_channel
+                            + out_strides[2] * h
+                            + out_strides[3] * w
+                        ] = accum
+    return
     raise NotImplementedError("Need to implement for Task 4.2")
 
 
